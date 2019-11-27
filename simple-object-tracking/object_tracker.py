@@ -9,6 +9,7 @@ import argparse
 import imutils
 import time
 import cv2
+import dlib
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -39,9 +40,10 @@ if not args.get("video", False):
 
 # otherwise, grab a reference to the video file
 else:
-    print(f'[INFO] opening video file {args["video"]}...')
+    print("[INFO] opening video file {}...",args["video"])
     vs = cv2.VideoCapture(args["video"])
 time.sleep(2.0)
+
 
 
 # loop over the frames from the video stream
@@ -105,6 +107,9 @@ while True:
     # show the output frame
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
+
+
+
 
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
