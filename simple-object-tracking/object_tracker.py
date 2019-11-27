@@ -9,7 +9,7 @@ import argparse
 import imutils
 import time
 import cv2
-import dlib
+# import dlib
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -21,6 +21,9 @@ ap.add_argument("-m", "--model", help="path to Caffe pre-trained model",
                 default="res10_300x300_ssd_iter_140000.caffemodel")
 ap.add_argument("-c", "--confidence", type=float, default=0.5,
                 help="minimum probability to filter weak detections")
+ap.add_argument("-w", "--wait", type=int, default=0,
+                help="wait after the first frame is shown")
+
 args = vars(ap.parse_args())
 
 # initialize our centroid tracker and frame dimensions
@@ -42,9 +45,17 @@ if not args.get("video", False):
 else:
     print("[INFO] opening video file {}...",args["video"])
     vs = cv2.VideoCapture(args["video"])
-time.sleep(2.0)
+# time.sleep(2.0)
 
 
+# workaround for saving resulting video to file
+# in the case of reading from file,wait after first frame
+# this gives user the possibility to start recording
+wait = (args["wait"] != 0)
+# print("wait is ",wait)
+#if not args.get("video", False):
+#    wait = False
+#    wait = True
 
 # loop over the frames from the video stream
 while True:
@@ -106,6 +117,9 @@ while True:
 
     # show the output frame
     cv2.imshow("Frame", frame)
+    if (wait):
+        text = input("Start screen recording and hit Enter!")
+        wait = False
     key = cv2.waitKey(1) & 0xFF
 
 
