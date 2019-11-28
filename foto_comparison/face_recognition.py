@@ -20,7 +20,9 @@
 #   refer to the C++ example program dnn_face_recognition_ex.cpp and the
 #   attendant documentation referenced therein.
 #
-#
+# You can download a trained facial shape predictor and recognition model from
+# "    http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2\n"
+# "    http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2"
 #
 #
 # COMPILING/INSTALLING THE DLIB PYTHON INTERFACE
@@ -45,6 +47,8 @@ import os
 import dlib
 import glob
 
+from scipy.spatial import distance
+
 
 predictor_path = 'shape_predictor_68_face_landmarks.dat'
 face_rec_model_path = 'dlib_face_recognition_resnet_model_v1.dat'
@@ -55,12 +59,9 @@ print(faces_folder_path)
 if len(sys.argv) != 2:
     print(
         "Call this program like this:\n"
-        "   ./face_recognition.py shape_predictor_5_face_landmarks.dat dlib_face_recognition_resnet_model_v1.dat ../examples/faces\n"
-        "You can download a trained facial shape predictor and recognition model from:\n"
-        "    http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2\n"
-        "    http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2")
+        "   ./face_recognition.py  ../examples/faces\n"
+        )
     exit()
-
 
 # Load all the models we need: a detector to find the faces, a shape predictor
 # to find face landmarks so we can precisely localize the face, and finally the
@@ -92,32 +93,9 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
         # Get the landmarks/parts for the face in box d.
         shape = sp(img, d)
         # Draw the face landmarks on the screen so we can see what face is currently being processed.
-        win.clear_overlay()
-        win.add_overlay(d)
-        win.add_overlay(shape)
-
-        # Compute the 128D vector that describes the face in img identified by
-        # shape.  In general, if two face descriptor vectors have a Euclidean
-        # distance between them less than 0.6 then they are from the same
-        # person, otherwise they are from different people. Here we just print
-        # the vector to the screen.
-        face_descriptor = facerec.compute_face_descriptor(img, shape)
-        print(face_descriptor)
-        # It should also be noted that you can also call this function like this:
-        #  face_descriptor = facerec.compute_face_descriptor(img, shape, 100, 0.25)
-        # The version of the call without the 100 gets 99.13% accuracy on LFW
-        # while the version with 100 gets 99.38%.  However, the 100 makes the
-        # call 100x slower to execute, so choose whatever version you like.  To
-        # explain a little, the 3rd argument tells the code how many times to
-        # jitter/resample the image.  When you set it to 100 it executes the
-        # face descriptor extraction 100 times on slightly modified versions of
-        # the face and returns the average result.  You could also pick a more
-        # middle value, such as 10, which is only 10x slower but still gets an
-        # LFW accuracy of 99.3%.
-        # 4th value (0.25) is padding around the face. If padding == 0 then the chip will
-        # be closely cropped around the face. Setting larger padding values will result a looser cropping.
-        # In particular, a padding of 0.5 would double the width of the cropped area, a value of 1.
-        # would triple it, and so forth.
+#        win.clear_overlay()
+#        win.add_overlay(d)
+#        win.add_overlay(shape)
 
         # There is another overload of compute_face_descriptor that can take
         # as an input an aligned image.
@@ -135,6 +113,35 @@ for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
 
         # Now we simply pass this chip (aligned image) to the api
         face_descriptor_from_prealigned_image = facerec.compute_face_descriptor(face_chip)
-        print(face_descriptor_from_prealigned_image)
+#        print(face_descriptor_from_prealigned_image)
+
+        print("Computing descriptor on full image ..")
+        # Compute the 128D vector that describes the face in img identified by
+        # shape.  In general, if two face descriptor vectors have a Euclidean
+        # distance between them less than 0.6 then they are from the same
+        # person, otherwise they are from different people. Here we just print
+        # the vector to the screen.
+        face_descriptor = facerec.compute_face_descriptor(img, shape)
+#        print(face_descriptor)
+        # It should also be noted that you can also call this function like this:
+        #  face_descriptor = facerec.compute_face_descriptor(img, shape, 100, 0.25)
+        # The version of the call without the 100 gets 99.13% accuracy on LFW
+        # while the version with 100 gets 99.38%.  However, the 100 makes the
+        # call 100x slower to execute, so choose whatever version you like.  To
+        # explain a little, the 3rd argument tells the code how many times to
+        # jitter/resample the image.  When you set it to 100 it executes the
+        # face descriptor extraction 100 times on slightly modified versions of
+        # the face and returns the average result.  You could also pick a more
+        # middle value, such as 10, which is only 10x slower but still gets an
+        # LFW accuracy of 99.3%.
+        # 4th value (0.25) is padding around the face. If padding == 0 then the chip will
+        # be closely cropped around the face. Setting larger padding values will result a looser cropping.
+        # In particular, a padding of 0.5 would double the width of the cropped area, a value of 1.
+        # would triple it, and so forth.
+
+
+# # Рассчитываем Евклидово расстояние между двумя дексрипторами лиц
+        a = distance.euclidean(face_descriptor, face_descriptor_from_prealigned_image)
+        print("Distance between descriptors is ", a)
 
         dlib.hit_enter_to_continue()
