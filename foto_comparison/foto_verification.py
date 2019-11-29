@@ -50,11 +50,11 @@ win1.set_image(img)
 # # Находим лицо на фотографии
 dets = detector(img, 1)
 
+win1.clear_overlay()
 for k, d in enumerate(dets):
     print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
         k, d.left(), d.top(), d.right(), d.bottom()))
     shape = sp(img, d)
-    win1.clear_overlay()
     win1.add_overlay(d)
     win1.add_overlay(shape)
 
@@ -72,11 +72,11 @@ win2 = dlib.image_window()
 win2.clear_overlay()
 win2.set_image(img)
 dets_webcam = detector(img, 1)
+win2.clear_overlay()
 for k, d in enumerate(dets_webcam):
     print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
         k, d.left(), d.top(), d.right(), d.bottom()))
     shape = sp(img, d)
-    win2.clear_overlay()
     win2.add_overlay(d)
     win2.add_overlay(shape)
 
