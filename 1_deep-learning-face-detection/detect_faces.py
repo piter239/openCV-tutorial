@@ -35,6 +35,8 @@ print("[INFO] computing object detections...")
 net.setInput(blob)
 detections = net.forward()
 
+print("number of faces found", detections.shape[2])
+
 # loop over the detections
 for i in range(0, detections.shape[2]):
 	# extract the confidence (i.e., probability) associated with the
