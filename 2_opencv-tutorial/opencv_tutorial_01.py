@@ -96,6 +96,7 @@ cv2.waitKey(0)
 
 # draw green text on the image
 output = image.copy()
-cv2.putText(output, "OpenCV + Jurassic Park!!!", (100, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+cv2.putText(output, "OpenCV + Jurassic Park!!!", (100, 25),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 cv2.imshow("Text", output)
 cv2.waitKey(0)

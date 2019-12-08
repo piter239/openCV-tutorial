@@ -1,6 +1,5 @@
 # USAGE
-# python build_face_dataset.py --cascade haarcascade_frontalface_default.xml
-#     --output dataset/adrian
+# python build_face_dataset.py  --output dataset/adrian
 
 # import the necessary packages
 from imutils.video import VideoStream
@@ -12,8 +11,12 @@ import os
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-c", "--cascade", required=True,
-                help="path to where the face cascade resides")
+ap.add_argument("-p", "--prototxt", default="deploy.prototxt.txt",
+                help="path to Caffe 'deploy' prototxt file")
+ap.add_argument("-m", "--model", help="path to Caffe pre-trained model",
+                default="res10_300x300_ssd_iter_140000.caffemodel")
+ap.add_argument("-c", "--confidence", type=float, default=0.8,
+                help="minimum probability to filter weak detections")
 ap.add_argument("-o", "--output", required=True,
                 help="path to output directory")
 args = vars(ap.parse_args())
