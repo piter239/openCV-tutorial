@@ -16,7 +16,7 @@ ap.add_argument("-p", "--prototxt", default="deploy.prototxt.txt",
                 help="path to Caffe 'deploy' prototxt file")
 ap.add_argument("-m", "--model", help="path to Caffe pre-trained model",
                 default="res10_300x300_ssd_iter_140000.caffemodel")
-ap.add_argument("-c", "--confidence", type=float, default=0.16,
+ap.add_argument("-c", "--confidence", type=float, default=0.15,
                 help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
