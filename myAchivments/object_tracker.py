@@ -1,7 +1,3 @@
-# USAGE
-# python object_tracker.py --prototxt deploy.prototxt
-# --model res10_300x300_ssd_iter_140000.caffemodel
-# import the necessary packages
 from pyimagesearch.centroidtracker import CentroidTracker
 from imutils.video import VideoStream
 import numpy as np
@@ -10,16 +6,14 @@ import imutils
 import time
 import cv2
 import dlib
-
-#
+from scipy.spatial import distance
+from skimage import io
 
 shape_predictor_path = 'shape_predictor_68_face_landmarks.dat'#
 sp = dlib.shape_predictor(shape_predictor_path)#
 face_recognition_model_path = 'dlib_face_recognition_resnet_model_v1.dat'#
 facerec = dlib.face_recognition_model_v1(face_recognition_model_path)#
 detector = dlib.get_frontal_face_detector()#
-
-#
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -69,6 +63,13 @@ wait = (args["wait"] != 0)
 #    wait = False
 #    wait = True
 
+img = io.imread('simon.jpg')
+dets = detector(img, 1)
+for k, d in enumerate(dets):
+    shape = sp(img, d)
+face_descriptor1 = facerec.compute_face_descriptor(img, shape)
+
+auth = dict()
 # loop over the frames from the video stream
 while True:
     # read the next frame from the video stream and resize it
@@ -99,6 +100,7 @@ while True:
     rects = []
     isis = False
     # loop over the detections
+    descriptors = dict()
     for i in range(0, detections.shape[2]):
         # filter out weak detections by ensuring the predicted
         # probability is greater than a minimum threshold
@@ -118,14 +120,14 @@ while True:
             #cv2.imshow("Frame", imutils.resize(frame[startX:endX, startY:endY], height = 300))
             img = frame[startX:endX, startY:endY]
             shape = None
+            cenPos = ((startX + endX) // 2, (startY + endY) // 2)
+            rad = max((endX - startX) // 2, (endY - startY) // 2)
             for d in detector(img, 1):
                 shape = sp(img, d)
+                descriptors[cenPos] = facerec.compute_face_descriptor(img, shape)
             if shape != None:
                 #print(facerec.compute_face_descriptor(img, shape))
                 isis = True
-
-            cenPos = ((startX + endX) // 2, (startY + endY) // 2)
-            rad = max((endX - startX) // 2, (endY - startY) // 2)
             if isis:
                 cv2.circle(frame, cenPos, rad, (0, 255, 0), 2)
             else:
@@ -144,8 +146,18 @@ while True:
         # draw both the ID of the object and the centroid of the
         # object on the output frame
         text = "ID {}".format(objectID)
-        #cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        #cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+        if (centroid[0], centroid[1]) in descriptors:
+            desc = descriptors[(centroid[0], centroid[1])]
+            a = distance.euclidean(face_descriptor1, desc)
+        else:
+            a = 1
+        if a < 0.601:
+            auth[objectID] = True
+        cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        if objectID in auth:
+            cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+        else:
+            cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 0, 255), -1)
 
     # show the output frame
     cv2.imshow("Frame", frame)
@@ -153,10 +165,6 @@ while True:
         text = input("Start screen recording and hit Enter!")
         wait = False
     key = cv2.waitKey(1) & 0xFF
-
-
-
-
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
         break
