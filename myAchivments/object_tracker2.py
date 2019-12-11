@@ -41,106 +41,127 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 dx = 20
 dy = 20
 
-last = dict()
-
-def getGlobalID(localeID, isis):
-    if isis:
-        return 'Simon Litvinskiy'
-    else:
-        return localeID
-
 # if a video path was not supplied, grab the reference
 # to the webcam
 if not args.get("video", False):
     print("[INFO] starting video stream...")
     vs = VideoStream(src=0).start()
+
+# otherwise, grab a reference to the video file
 else:
     print("[INFO] opening video file {}...",args["video"])
     vs = cv2.VideoCapture(args["video"])
+# time.sleep(2.0)
+
+
+# workaround for saving resulting video to file
+# in the case of reading from file,wait after first frame
+# this gives user the possibility to start recording
 wait = (args["wait"] != 0)
+# print("wait is ",wait)
+#if not args.get("video", False):
+#    wait = False
+#    wait = True
+
 img = io.imread('simon.jpg')
 dets = detector(img, 1)
 for k, d in enumerate(dets):
     shape = sp(img, d)
 face_descriptor1 = facerec.compute_face_descriptor(img, shape)
+
 auth = dict()
+# loop over the frames from the video stream
 while True:
+    # read the next frame from the video stream and resize it
     frame = vs.read()
+
+    # handle the frame from VideoCapture or VideoStream
     frame = frame[1] if args.get("video", False) else frame
+
+    # if we are viewing a video and we did not grab a frame,
+    # then we have reached the end of the video
     if frame is None:
         break
+
     frame = imutils.resize(frame, height=300)
+
+    # if the frame dimensions are None, grab them
     if W is None or H is None:
         (H, W) = frame.shape[:2]
+
+    # print(H, W)
+    # construct a blob from the frame, pass it through the network,
+    # obtain our output predictions, and initialize the list of
+    # bounding box rectangles
     blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H), (104.0, 177.0, 123.0))
     net.setInput(blob)
     detections = net.forward()
     rects = []
     isis = False
-    isis2 = False
+    # loop over the detections
     descriptors = dict()
     for i in range(0, detections.shape[2]):
+        # filter out weak detections by ensuring the predicted
+        # probability is greater than a minimum threshold
         if detections[0, 0, i, 2] > args["confidence"]:
+            # compute the (x, y)-coordinates of the bounding box for
+            # the object, then update the bounding box rectangles list
             box = detections[0, 0, i, 3:7] * np.array([W, H, W, H])
             rects.append(box.astype("int"))
+
+            # draw a bounding box surrounding the object so we can
+            # visualize it
             (startX, startY, endX, endY) = box.astype("int")
             startX -= dx
             endX += dx
             startY -= dy
             endY += dy
+            #cv2.imshow("Frame", imutils.resize(frame[startX:endX, startY:endY], height = 300))
             img = frame[startX:endX, startY:endY]
             shape = None
             cenPos = ((startX + endX) // 2, (startY + endY) // 2)
             rad = max((endX - startX) // 2, (endY - startY) // 2)
+            desc = None
             for d in detector(img, 1):
                 shape = sp(img, d)
-                descriptors[cenPos] = facerec.compute_face_descriptor(img, shape)
+                desc = facerec.compute_face_descriptor(img, shape)
             if shape != None:
+                #print(facerec.compute_face_descriptor(img, shape))
                 isis = True
             if isis:
                 cv2.circle(frame, cenPos, rad, (0, 255, 0), 2)
             else:
                 cv2.circle(frame, cenPos, rad, (0, 0, 255), 2)
-    objects = ct.update(rects)
-    for (objectID, centroid) in objects.items():
-        globalID = getGlobalID(objectID, objectID in auth)
-        text = "{}".format(globalID)
-        if not globalID in last:
-            print('open session for ', text)
-        else:
-            last[globalID] = 1
-        if (centroid[0], centroid[1]) in descriptors:
-            desc = descriptors[(centroid[0], centroid[1])]
-            a = distance.euclidean(face_descriptor1, desc)
-        else:
-            a = 1
-        if a < 0.601:
-            auth[objectID] = True
-        cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        if objectID in auth:
-            cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
-        else:
-            cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 0, 255), -1)
+            text = "ID {}".format(i)
+            if desc != None:
+                a = distance.euclidean(face_descriptor1, desc)
+            else:
+                a = 1
+            cv2.putText(frame, text, (cenPos[0] - 10, cenPos[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            if a < 0.601:
+                cv2.circle(frame, cenPos, 4, (0, 255, 0), -1)
+            else:
+                cv2.circle(frame, cenPos, 4, (0, 0, 255), -1)
 
-
-    for objectID in last:
-        if last[objectID] == 0:
-            print('close session for ', "{}".format(objectID))
-    last = dict()
-    for (objectID, centroid) in objects.items():
-        last[getGlobalID(objectID, objectID in auth)] = 0
-        
+            #if isis:
+            #    cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 255, 0), 2)
+            #else:
+            #    cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
+    # show the output frame
     cv2.imshow("Frame", frame)
     if (wait):
         text = input("Start screen recording and hit Enter!")
         wait = False
     key = cv2.waitKey(1) & 0xFF
+    # if the `q` key was pressed, break from the loop
     if key == ord("q"):
         break
-    
+
+# do a bit of cleanup
+# if we are not using a video file, stop the camera video stream
 if not args.get("video", False):
     vs.stop()
+# otherwise, release the camera
 else:
     vs.release()
-
 cv2.destroyAllWindows()
