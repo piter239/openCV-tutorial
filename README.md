@@ -16,10 +16,14 @@ pip install dlib
 # Thing ready to show today
 
 # detect faces with preset confidence
-cd cd 1_deep-learning-face-detection
+
+cd 1_deep-learning-face-detection
+
 py detect_faces_video.py  -c 0.15
 
 
 # Track faces with IDs in webcam or video files
+
 cd simple-object-tracking
+
 py object_tracker.py
