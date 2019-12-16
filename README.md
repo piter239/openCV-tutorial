@@ -4,6 +4,7 @@
 #source: https://www.learnopencv.com/install-opencv-3-and-dlib-on-windows-python-only/
 pip install numpy scipy matplotlib scikit-learn jupyter
 pip install opencv-contrib-python
+pip install imutils
 pip install cmake
 pip install dlib
 
