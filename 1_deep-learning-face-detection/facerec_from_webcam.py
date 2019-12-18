@@ -2,6 +2,11 @@ import face_recognition
 import cv2
 import numpy as np
 
+import os
+import re
+import click
+
+
 # This is a demo of running face recognition on live video from your webcam. It's a little more complicated than the
 # other example, but it includes some basic performance tweaks to make things run a lot faster:
 #   1. Process each video frame at 1/4 resolution (though still display it at full resolution)
@@ -14,40 +19,38 @@ import numpy as np
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
-# Load a sample picture and learn how to recognize it.
-obama_image = face_recognition.load_image_file("known_people/Natasha.jpg")
-obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
 
-# Load a second sample picture and learn how to recognize it.
-biden_image = face_recognition.load_image_file("known_people/Irisha.jpg")
-biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
+def image_files_in_folder(folder):
+    return [os.path.join(folder, f) for f in os.listdir(folder) if re.match(r'.*\.(jpg|jpeg|png)', f, flags=re.I)]
 
-img = face_recognition.load_image_file("known_people/Peter.jpg")
-face_enc = face_recognition.face_encodings(img)[0]
+def scan_known_people(known_people_folder):
+    known_names = []
+    known_face_encodings = []
 
-img1 = face_recognition.load_image_file("known_people/Elena.jpg")
-face_enc1 = face_recognition.face_encodings(img1)[0]
+    for file in image_files_in_folder(known_people_folder):
+        basename = os.path.splitext(os.path.basename(file))[0]
 
-img2 = face_recognition.load_image_file("known_people/Egor.jpg")
-face_enc2 = face_recognition.face_encodings(img2)[0]
+        img = face_recognition.load_image_file(file)
+        encodings = face_recognition.face_encodings(img)
 
+        if len(encodings) > 1:
+            click.echo("WARNING: More than one face found in {}. Only considering the first face.".format(file))
 
+        if len(encodings) == 0:
+            click.echo("WARNING: No faces found in {}. Ignoring file.".format(file))
+        else:
+            known_names.append(basename.split(".")[0])
+            known_face_encodings.append(encodings[0])
+
+    return known_names, known_face_encodings
 
 # Create arrays of known face encodings and their names
-known_face_encodings = [
-    obama_face_encoding,
-    biden_face_encoding,
-    face_enc,
-    face_enc1,
-    face_enc2
-]
-known_face_names = [
-    "Natasha",
-    "Irisha",
-    "Peter",
-    "Elena",
-    "Egor"
-]
+known_people_folder = "known_people/"
+known_face_names, known_face_encodings = scan_known_people(known_people_folder)
+
+print(known_face_names)
+
+
 
 # Initialize some variables
 face_locations = []
