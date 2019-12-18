@@ -6,7 +6,7 @@
 pip install numpy scipy matplotlib scikit-learn jupyter
 
 pip install opencv-contrib-python
-
+pip install imutils
 pip install cmake
 
 pip install dlib
