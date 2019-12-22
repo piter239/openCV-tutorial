@@ -12,3 +12,7 @@ simple-object-tracking/VID_20191204_181058AA.MP4
 1_deep-learning-face-detection/known_people/*
 robik_DM/known_people/*
 robik_DM/samples/*
+robik_DM/dataset_faces.dat
+robik_DM/dataset_faces.datt
+robik_DM/results
+*.avi
