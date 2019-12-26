@@ -16,3 +16,4 @@ robik_DM/dataset_faces.dat
 robik_DM/dataset_faces.datt
 robik_DM/results
 *.avi
+simple-object-tracking/pyimagesearch/__pycache__/*
