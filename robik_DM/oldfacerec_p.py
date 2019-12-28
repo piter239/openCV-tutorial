@@ -75,7 +75,7 @@ if createNewModel:
             known_face_encodings.append(face_recognition.face_encodings(img)[0])
             known_face_names.append(str)
             face_saves[i] = encods[0]
-            print("Вижу " + str)
+            # print("Вижу " + str)
     with open('dataset_faces.dat', 'wb') as f:
         pickle.dump(face_saves, f)
 else:
@@ -89,15 +89,37 @@ else:
 
 # remember a list of greetings
 greetings = [
-    "Привет!",
-    "Меня зовут Робик",
-    "С наступающим ПРАЗДНИКОМ!",
-    "С Новым ГОДОМ!",
-    "Здравствуй, друг!",
-    "Приветствую!",
-    "Рад встрече",
-    "Привет, давай дружить! Я робот Робик",
-    "Привет, как тебя зовут"
+    " Привет! ",
+    " Меня зовут Робик ",
+    " Здравствуй, друг! ",
+    " Приветствую! ",
+    " Рад встрече, меня зовут Робик ",
+    " Привет, давай дружить! ",
+    " Привет, Я робот Робик "
+]
+
+NY = [
+    " С наступающим ПРАЗДНИКОМ!",
+    " С Новым годом!",
+    " Желаю тебе всего наилучшего!",
+    " Пусть сбудутся твои самые заветные мечты",
+    " Пусть тебе мечтается, и пусть мечты - сбываются",
+    " Желаю тебе здоровья и счастья!",
+    " Желаю тебе  узнать много нового и интересного",
+    " Пусть у тебя станет ещё больше настоящих друзей"    
+]
+
+
+# remember a list of personal greetings
+personal_greetings = [
+    "Я думаю, ты {}. Подскажи, угадал ли я.", 
+    #"Я думаю, ты {}. Намекни, угадал ли я.", 
+    "Я думаю, ты {}. Дай знать, так ли это", 
+    "Ты напоминаешь мне моего друга по имени {}", 
+    "Мне кажется, я тебя узнал! Ты {}. Кивни, если это так", 
+    "Я думаю, ты {}. Подскажи, угадал ли я.", 
+    "Твоё имя {}? Дай знать, если да!", 
+    "Мне кажется, тебя зовут {}. Кивни, если да!" 
 ]
 
 
@@ -110,7 +132,7 @@ for i in known_face_names:
     last_hello[i] = 0   #
 
 # set minimal time between consequent "Hello!" for Unknown
-t_all = 5
+t_all = 7
 
 # set minimal time between consequent "I know you!" for the same name
 t = 20
@@ -161,7 +183,7 @@ while True:
 
             if face_distances[best_match_index] < 0.45 and matches[best_match_index]:
                 name = known_face_names[best_match_index]
-                print(name)
+                # print(name)
             face_dists.append(face_distances[best_match_index])
             face_names.append(name)
 
@@ -170,7 +192,7 @@ while True:
     # Display the results
     rects = []
 
-# ПО УМУ ТУТ ПРОСТО НАДО ОТСОРТИРОВАТЬ ПО ДИСТАНЦИЯМ. Увы, моего знания Питона не хватает (Пётр)
+# ПО УМУ ТУТ ПРОСТО НАДО ОТСОРТИРОВАТЬ ПО ДИСТАНЦИЯМ. Увы, моего знания Питона пока не хватает (Пётр)
     found_known_face = False
     for (top, right, bottom, left), name, dist in zip(face_locations, face_names, face_dists):
         # Scale back up face locations since the frame we detected in was scaled to 1/4 size
@@ -183,34 +205,36 @@ while True:
         left *= 2
         rects.append(np.array([right, top, left, bottom]))
 
-        print(time.time() - last_hello["all"])
+        # print(time.time() - last_hello["all"])
 
         # Draw a box around the face
         cv2.circle(frame, ((left + right) // 2, (top + bottom) // 2), max(abs(left - right) // 2, abs(top - bottom) // 2) + 20, (255, 0, 0), 3)
 
-        if name != "Unknown" and not found_known_face:
+        if name != "Unknown" and (not found_known_face):
             found_known_face = True
             last_hello["all"] = time.time() + t # pause with greetings no Unknown
             (topN, rightN, bottomN, leftN) = (top, right, bottom, left)
             if time.time() - last_hello[name] > t: # and time.time() - last_hello["all"] > t_all:
-                greeting = "Я думаю, ты " + getName(name) + ". Подскажи, угадал ли я."
-                print(greeting)
+                greeting = random.choice(NY) + " . " +random.choice(personal_greetings).format(getName(name))
+                
+                print(getName(name)+"\n")
                 if not os.name == 'nt':
                     subprocess.Popen(["echo  " + greeting + "  |RHVoice-test -p Elena"], shell=True)
-                last_hello["all"] = time.time() + t # pause with greetings no Unknown
+                last_hello["all"] = time.time() + t_all # pause with greetings no Unknown
                 last_hello[name] = time.time()
 
                 # remember POI
                 found_known_face = True
                 (topN, rightN, bottomN, leftN) = (top, right, bottom, left)
 
+    # now loop through Unknowns. This is NOT a permanent solution            
     for (top, right, bottom, left), name, dist in zip(face_locations, face_names, face_dists):
 
-        if not (name != "Unknown" and not found_known_face):
-            print("detect " + name)
+        if name == "Unknown" and not found_known_face:
+            print("detect " + name, " time_all ",(time.time() - last_hello["all"]) )
             if time.time() - last_hello["all"] > t_all:
-                greeting = random.choice(greetings)
-                print(greeting)
+                greeting = random.choice(greetings) + " . " + random.choice(NY)
+                # print(greeting)
                 if not os.name == 'nt':
                     subprocess.Popen(["echo  " + greeting + "  |RHVoice-test -p Elena"], shell=True)
                 last_hello["all"] = time.time()
