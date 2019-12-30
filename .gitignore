@@ -15,5 +15,9 @@ robik_DM/samples/*
 robik_DM/dataset_faces.dat
 robik_DM/dataset_faces.datt
 robik_DM/results
+robik_DM/build
+robik_DM/dist
+robik_DM/kids
 *.avi
 simple-object-tracking/pyimagesearch/__pycache__/*
+*.spec
