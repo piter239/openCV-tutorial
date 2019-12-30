@@ -94,7 +94,7 @@ addToExistingDataset = True
 if loadNewModels:
     if addToExistingDataset:
         loadExistingDataset(face_saves)
-# I have NO idea why face_saves becomes empty the moment we leave toe LED function
+# I have NO idea why face_saves becomes empty the moment we leave the LED function
     print("existing dataset loaded. # of known faces ", len(face_saves))
     print('we load new models. Wait please...')
     for i in glob.glob("./kids/*"):
@@ -164,10 +164,10 @@ for i in known_face_names:
     last_hello[i] = 0   #
 
 # set minimal time between consequent "Hello!" for Unknown
-t_all = 13
+t_all = 10
 
 # set minimal time between consequent "I know you!" for the same name
-t = 20
+t = 30
 
 
 # Initialize some variables
