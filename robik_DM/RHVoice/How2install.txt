@@ -1,0 +1,10 @@
+﻿Не включённые компоненты:
+
+robik_DM/RHVoice/RHVoice-V.0.7.1-Windows.zip
+Загружать с
+
+RHVoice с поддержкой русского языка и голосом Aleksandr
+
+1) G:\ROBIK_DM\RHVoice-V.0.7.1-Windows\RHVoice-V.0.7.1-Windows\1. General
+2) G:\ROBIK_DM\RHVoice-V.0.7.1-Windows\RHVoice-V.0.7.1-Windows\2. Language
+3) G:\ROBIK_DM\RHVoice-V.0.7.1-Windows\RHVoice-V.0.7.1-Windows\3. Voice

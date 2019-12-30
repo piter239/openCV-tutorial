@@ -21,3 +21,5 @@ robik_DM/kids
 *.avi
 simple-object-tracking/pyimagesearch/__pycache__/*
 *.spec
+*.pyc
+robik_DM/RHVoice/RHVoice-V.0.7.1-Windows.zip

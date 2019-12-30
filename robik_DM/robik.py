@@ -78,23 +78,27 @@ face_saves = dict()
 
 
 def loadExistingDataset(face_saves):
+# NB: object reference "face_saves" is passed by value
+# so we have to add loaded dataset to it
+# It is done for each key/value pair.
+# Presently I don't know how to do it at confidence
+# First idea TODO: return the loaded dictionary
     print('we load dataset of known people. 1sec...')
     with open('dataset_faces.dat', 'rb') as f:
-        face_saves = pickle.load(f)
+        ex_face_saves = pickle.load(f)
         f.close()
-    for key in face_saves:
-        val = face_saves[key]
+    for key in ex_face_saves:
+        val = ex_face_saves[key]
+        face_saves[key] = val
         known_face_encodings.append(val)
         known_face_names.append(key)
-    print("existing dataset loaded.1 # of known faces ", len(face_saves))
 
 
-loadNewModels = False   # load models from ./kids directory
+loadNewModels = False   # load models from ./kids/ directory
 addToExistingDataset = True
 if loadNewModels:
     if addToExistingDataset:
         loadExistingDataset(face_saves)
-# I have NO idea why face_saves becomes empty the moment we leave the LED function
     print("existing dataset loaded. # of known faces ", len(face_saves))
     print('we load new models. Wait please...')
     for i in glob.glob("./kids/*"):
