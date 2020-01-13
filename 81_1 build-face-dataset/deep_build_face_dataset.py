@@ -13,6 +13,8 @@ import os
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--prototxt", default="deploy.prototxt.txt",
                 help="path to Caffe 'deploy' prototxt file")
+#ap.add_argument("-c", "--cascade", required=True,
+#                help="path to where the face cascade resides")
 ap.add_argument("-m", "--model", help="path to Caffe pre-trained model",
                 default="res10_300x300_ssd_iter_140000.caffemodel")
 ap.add_argument("-c", "--confidence", type=float, default=0.8,
@@ -22,7 +24,7 @@ ap.add_argument("-o", "--output", required=True,
 args = vars(ap.parse_args())
 
 # load OpenCV's Haar cascade for face detection from disk
-detector = cv2.CascadeClassifier(args["cascade"])
+#detector = cv2.CascadeClassifier(args["cascade"])
 
 # initialize the video stream, allow the camera sensor to warm up,
 # and initialize the total number of example faces written to disk

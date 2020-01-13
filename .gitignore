@@ -15,5 +15,12 @@ robik_DM/samples/*
 robik_DM/dataset_faces.dat
 robik_DM/dataset_faces.datt
 robik_DM/results
+robik_DM/build
+robik_DM/dist
+robik_DM/kids
 *.avi
+simple-object-tracking/pyimagesearch/__pycache__/*
+*.spec
+*.pyc
+robik_DM/RHVoice/RHVoice-V.0.7.1-Windows.zip
 dataset_faces.dat
