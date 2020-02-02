@@ -191,6 +191,18 @@ def utter_str(str='Кто и шутя и скоро возжелает пи уз
     tts_engine.say(str, "first")
     # tts_engine.runAndWait() # this has to be called to read aloud. Blocks the thread!
 
+from threading import Thread
+
+def proceed_speech():
+    tts_count = 0
+    while True:
+        tts_engine.runAndWait()
+        tts_count += 1
+        #print(tts_count)
+
+#thread.start_new_thread(proceed_speech, ())
+thread_tts = Thread(target=proceed_speech, args=())
+thread_tts.start()
 
 while True:
     # Grab a single frame of video
@@ -307,7 +319,7 @@ while True:
         update_log_video()
 
     cv2.imshow('Video', frame)
-    tts_engine.runAndWait()
+    #tts_engine.runAndWait()
 
     # Hit 'q' on the keyboard to quit!
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -318,3 +330,4 @@ video_capture.release()
 cv2.destroyAllWindows()
 
 out.release()
+thread_tts.join()
